@@ -168,6 +168,15 @@ contract Registrar is Context, ERC721Enumerable, ERC721Burnable, RegistrarPausab
         
         return true;
     }
+    function updateBool(address recipient, bytes32 key, bool value) public override onlyOwner(recipient) returns (bool) {
+        _infos[recipient].boolStore[key] = value;
+        
+        emit Updated(_msgSender(), recipient, key, value);
+        
+        mintKey(recipient, key);
+        
+        return true;
+    }
     
     
     function updateAddressByString(address recipient, string memory key, address value) public override returns (bool) {
@@ -187,6 +196,9 @@ contract Registrar is Context, ERC721Enumerable, ERC721Burnable, RegistrarPausab
     }
     function updateBytes32ByString(address recipient, string memory key, bytes32 value) public override returns (bool) {
         return updateBytes32(recipient, keccak256(abi.encodePacked(key)), value);
+    }
+    function updateBoolByString(address recipient, string memory key, bool value) public override returns (bool) {
+        return updateBool(recipient, keccak256(abi.encodePacked(key)), value);
     }
     
     function deleteAddress(address recipient, bytes32 key) public override onlyOwner(recipient) returns (bool) {
@@ -237,7 +249,14 @@ contract Registrar is Context, ERC721Enumerable, ERC721Burnable, RegistrarPausab
         
         return true;
     }
-    
+    function deleteBool(address recipient, bytes32 key) public override onlyOwner(recipient) returns (bool) {
+        bool value = _infos[recipient].boolStore[key]; 
+        delete _infos[recipient].boolStore[key];
+        
+        emit Deleted(_msgSender(), recipient, key, value);
+        
+        return true;
+    }
     
     function getAddress(address recipient, bytes32 key) public view override returns (address value) {
         return _infos[recipient].addressStore[key];
@@ -257,6 +276,9 @@ contract Registrar is Context, ERC721Enumerable, ERC721Burnable, RegistrarPausab
     function getBytes32(address recipient, bytes32 key) public view override returns (bytes32 value) {
         return _infos[recipient].bytes32Store[key];
     }
+    function getBool(address recipient, bytes32 key) public view override returns (bool value) {
+        return _infos[recipient].boolStore[key];
+    }
     
     function getAddressByString(address recipient, string memory key) public view override returns (address value) {
         return _infos[recipient].addressStore[keccak256(abi.encodePacked(key))];
@@ -275,6 +297,9 @@ contract Registrar is Context, ERC721Enumerable, ERC721Burnable, RegistrarPausab
     }
     function getBytes32ByString(address recipient, string memory key) public view override returns (bytes32 value) {
         return _infos[recipient].bytes32Store[keccak256(abi.encodePacked(key))];
+    }
+    function getBoolByString(address recipient, string memory key) public view override returns (bool value) {
+        return _infos[recipient].boolStore[keccak256(abi.encodePacked(key))];
     }
     
     

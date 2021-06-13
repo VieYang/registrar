@@ -19,6 +19,7 @@ interface IRegistrar {
     function updateString(address recipient, bytes32 key, string memory value) external returns (bool);
     function updateBytes(address recipient, bytes32 key, bytes memory value) external returns (bool);
     function updateBytes32(address recipient, bytes32 key, bytes32 value) external returns (bool);
+    function updateBool(address recipient, bytes32 key, bool value) external returns (bool);
 
     /**
      * @dev The same as updateType.
@@ -32,6 +33,7 @@ interface IRegistrar {
     function updateStringByString(address recipient, string memory key, string memory value) external returns (bool);
     function updateBytesByString(address recipient, string memory key, bytes memory value) external returns (bool);
     function updateBytes32ByString(address recipient, string memory key, bytes32 value) external returns (bool);
+    function updateBoolByString(address recipient, string memory key, bool value) external returns (bool);
 
    /**
      * @dev Delete the `value` of `key` for `recipient`.
@@ -46,6 +48,7 @@ interface IRegistrar {
     function deleteString(address recipient, bytes32 key) external returns (bool);
     function deleteBytes(address recipient, bytes32 key) external returns (bool);
     function deleteBytes32(address recipient, bytes32 key) external returns (bool);
+    function deleteBool(address recipient, bytes32 key) external returns (bool);
 
     /**
      * @dev Returns the `value` of `key` for `recipient`.
@@ -58,6 +61,7 @@ interface IRegistrar {
     function getString(address recipient, bytes32 key) external view returns (string memory value);
     function getBytes(address recipient, bytes32 key) external view returns (bytes memory value);
     function getBytes32(address recipient, bytes32 key) external view returns (bytes32);
+    function getBool(address recipient, bytes32 key) external view returns (bool);
     
     function getAddressByString(address recipient, string memory key) external view returns (address value);
     function getUint256ByString(address recipient, string memory key) external view returns (uint256 value);
@@ -65,6 +69,7 @@ interface IRegistrar {
     function getStringByString(address recipient, string memory key) external view returns (string memory value);
     function getBytesByString(address recipient, string memory key) external view returns (bytes memory value);
     function getBytes32ByString(address recipient, string memory key) external view returns (bytes32);
+    function getBoolByString(address recipient, string memory key) external view returns (bool);
 
     /**
      * @dev Emitted when `value` updated.
@@ -77,6 +82,7 @@ interface IRegistrar {
     event Updated(address indexed owner, address indexed recipient, bytes32 indexed key, string value);
     event Updated(address indexed owner, address indexed recipient, bytes32 indexed key, bytes value);
     event Updated(address indexed owner, address indexed recipient, bytes32 indexed key, bytes32 value);
+    event Updated(address indexed owner, address indexed recipient, bytes32 indexed key, bool value);
 
     /**
      * @dev Emitted when `value` deleted.
@@ -87,4 +93,5 @@ interface IRegistrar {
     event Deleted(address indexed owner, address indexed recipient, bytes32 indexed key, string value);
     event Deleted(address indexed owner, address indexed recipient, bytes32 indexed key, bytes value);
     event Deleted(address indexed owner, address indexed recipient, bytes32 indexed key, bytes32 value);
+    event Deleted(address indexed owner, address indexed recipient, bytes32 indexed key, bool value);
 }

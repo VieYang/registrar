@@ -250,6 +250,37 @@
 				"anonymous": false,
 				"inputs": [
 					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "key",
+						"type": "bytes32"
+					},
+					{
+						"indexed": false,
+						"internalType": "bool",
+						"name": "value",
+						"type": "bool"
+					}
+				],
+				"name": "Deleted",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
 						"indexed": false,
 						"internalType": "address",
 						"name": "account",
@@ -484,6 +515,37 @@
 				"type": "event"
 			},
 			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "key",
+						"type": "bytes32"
+					},
+					{
+						"indexed": false,
+						"internalType": "bool",
+						"name": "value",
+						"type": "bool"
+					}
+				],
+				"name": "Updated",
+				"type": "event"
+			},
+			{
 				"inputs": [],
 				"name": "OwnerData",
 				"outputs": [
@@ -573,6 +635,30 @@
 					}
 				],
 				"name": "deleteAddress",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "key",
+						"type": "bytes32"
+					}
+				],
+				"name": "deleteBool",
 				"outputs": [
 					{
 						"internalType": "bool",
@@ -765,6 +851,54 @@
 						"internalType": "address",
 						"name": "",
 						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "key",
+						"type": "bytes32"
+					}
+				],
+				"name": "getBool",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "value",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "key",
+						"type": "string"
+					}
+				],
+				"name": "getBoolByString",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "value",
+						"type": "bool"
 					}
 				],
 				"stateMutability": "view",
@@ -1373,6 +1507,64 @@
 						"type": "bytes32"
 					},
 					{
+						"internalType": "bool",
+						"name": "value",
+						"type": "bool"
+					}
+				],
+				"name": "updateBool",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "key",
+						"type": "string"
+					},
+					{
+						"internalType": "bool",
+						"name": "value",
+						"type": "bool"
+					}
+				],
+				"name": "updateBoolByString",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "key",
+						"type": "bytes32"
+					},
+					{
 						"internalType": "bytes",
 						"name": "value",
 						"type": "bytes"
@@ -1750,19 +1942,19 @@
 	},
 	"sources": {
 		"IRegistrar.sol": {
-			"keccak256": "0x6aa9b6929f8f95168ac783cf3a5ff51c809f8850f49177318edf728741547342",
+			"keccak256": "0xed9702102773788ebe0fb5237b506d994a3df393368eba090a691f18cca05962",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://06ff6e113f8e04efe461d75ac4fcb2c7fb279de858e8a9c7c7f6e5540c8347b9",
-				"dweb:/ipfs/QmTsQ2VnmzMcrjwZQ5qBfmiqpu5mxNiQUg16mQQLj7fwgU"
+				"bzz-raw://f78fc4017ecfd1f96538f919a192359cb9a613e4660975bade0e45a3796ed1b7",
+				"dweb:/ipfs/QmNuhkQGtSrpAjavwzJiGdWXskicFqRhizwPfJ6QhpYaan"
 			]
 		},
 		"Registrar.sol": {
-			"keccak256": "0x4ba29ea431fa04464f6678e2173e298dcf0565123a42d9173e7fca4857f35f03",
+			"keccak256": "0x383eaa5c76c82ce07b6de0c2ab2f00df39d0c50b7747e0b350501b0d90bf9a6e",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://582d2f0fc7079de62f6dbebf06fd16e00337c18ebd20958dcd911ed06c4f0ca1",
-				"dweb:/ipfs/QmfCP2dwhSgpqTniJoEMFr6m85QQsSmW3A54KJ4FFDUUKB"
+				"bzz-raw://6bc0772d30af1b52adfe21d890d18da33b35e751adbd5a53fc099a49339fa7e8",
+				"dweb:/ipfs/QmPdz9Jvy23y7QpTeDW5y91LEwVWbv8bqGv3rFvA1nHSS6"
 			]
 		},
 		"RegistrarPausable.sol": {
