@@ -5,36 +5,19 @@ pragma solidity ^0.8.0;
 import "./openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "./openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "./openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Burnable.sol";
-// import "./openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Pausable.sol";
-// import "./openzeppelin-contracts/contracts/access/AccessControlEnumerable.sol";
 import "./openzeppelin-contracts/contracts/utils/Context.sol";
-// import "./openzeppelin-contracts/contracts/utils/Counters.sol";
 import "./openzeppelin-contracts/contracts/utils/Address.sol";
 import "./IRegistrar.sol";
 import "./RegistrarPausable.sol";
 
 
-interface OwnerableContract {
-    function owner() external view returns (address);
-}
-
 /**
- * @dev {ERC721} token, including:
+ * @dev {Registrar} token, including:
  *
- *  - ability for holders to burn (destroy) their tokens
- *  - a minter role that allows for token minting (creation)
- *  - a pauser role that allows to stop all token transfers
- *  - token ID and URI autogeneration
- *
- * This contract uses {AccessControl} to lock permissioned functions using the
- * different roles - head to its documentation for details.
- *
- * The account that deploys the contract will be granted the minter and pauser
- * roles, as well as the default admin role, which will let it grant both minter
- * and pauser roles to other accounts.
+ *  - store info by verify owner
+ *  - mint token ID
  */
-contract Registrar is Context, ERC721Enumerable, ERC721Burnable, RegistrarPausable, IRegistrar {
+contract Registrar is Context, ERC721Enumerable, RegistrarPausable, IRegistrar {
      string private _baseTokenURI;
 
     /**
@@ -48,9 +31,10 @@ contract Registrar is Context, ERC721Enumerable, ERC721Burnable, RegistrarPausab
         _pause();   // force pause token transfer
     }
 
-    enum InfoType {
-        NATIVE  // Naive address
-    }
+    // // TODO: support info type
+    // enum InfoType {
+    //     NATIVE  // Naive address
+    // }
 
     bytes4 public constant OwnerSelector = bytes4(keccak256("owner()")); // 0x8da5cb5b
     bytes public constant OwnerData = abi.encodeWithSelector(OwnerSelector);
@@ -303,7 +287,7 @@ contract Registrar is Context, ERC721Enumerable, ERC721Burnable, RegistrarPausab
     }
     
     
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override(ERC721, ERC721Enumerable, RegistrarPausable) {
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override(ERC721Enumerable, RegistrarPausable) {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
