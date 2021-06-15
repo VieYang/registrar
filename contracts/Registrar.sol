@@ -23,7 +23,13 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, RegistrarPaus
     using Counters for Counters.Counter;
     
     Counters.Counter private _tokenIdTracker;
-    
+
+    bytes4 public constant OwnerSelector = bytes4(keccak256("owner()")); // 0x8da5cb5b
+    bytes public constant OwnerData = abi.encodeWithSelector(OwnerSelector);
+
+    // target ==> key ==> value
+    mapping (address => mapping (bytes32 => string)) private _infos;
+
     /**
      * @dev Pause all token transfer.
      *
@@ -34,21 +40,18 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, RegistrarPaus
         _pause();   // force pause token transfer
     }
 
-    bytes4 public constant OwnerSelector = bytes4(keccak256("owner()")); // 0x8da5cb5b
-    bytes public constant OwnerData = abi.encodeWithSelector(OwnerSelector);
-
-    function isReceiptOwner(address owner, address recipient) public view returns (bool) {
-        if (recipient == owner) {
+    function isReceiptOwner(address owner, address target) public view returns (bool) {
+        if (target == owner) {
             return true;
         }
         
-        if (Address.isContract(recipient)) {
-            // refer Address.functionStaticCall(recipient, OwnerData);
+        if (Address.isContract(target)) {
+            // refer Address.functionStaticCall(target, OwnerData);
             // solhint-disable-next-line avoid-low-level-calls
-            (bool success, bytes memory returndata) = recipient.staticcall(OwnerData);
+            (bool success, bytes memory returndata) = target.staticcall(OwnerData);
             if (success) {
-                address recipientOwner = abi.decode(returndata, (address));
-                if (recipientOwner == owner) {
+                address targetOwner = abi.decode(returndata, (address));
+                if (targetOwner == owner) {
                     return true;
                 }
             }
@@ -58,29 +61,13 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, RegistrarPaus
     }
     
     /**
-     * @dev Throws if called by any account other than the owner of the recipient.
+     * @dev Throws if called by any account other than the owner of the target.
      */
-    modifier onlyOwner(address recipient) {
-        require(isReceiptOwner(_msgSender(), recipient), "Registrar: caller is not the owner of recipient");
+    modifier onlyOwner(address target) {
+        require(isReceiptOwner(_msgSender(), target), "Registrar: caller is not the owner of target");
         _;
     }
 
-    /**
-     * Core
-     */
-
-    // TODO: update info to library
-    struct Info {
-        mapping (bytes32 => bool) boolStore;
-        mapping (bytes32 => address) addressStore;
-        mapping (bytes32 => uint256) uint256Store;
-        mapping (bytes32 => int256) int256Store;
-        mapping (bytes32 => string) stringStore;
-        mapping (bytes32 => bytes) bytesStore;
-        mapping (bytes32 => bytes32) bytes32Store;
-        
-    }
-    mapping (address => Info) private _infos;
     
     /**
      * @dev See {IERC721Metadata-tokenURI}.
@@ -132,193 +119,20 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, RegistrarPaus
             _mint(to, tokenId);
         }
     }
+   
+    function updateEntry(address target, bytes32 key, string memory value) override onlyOwner(target) public returns (bool) {
+        _infos[target][key] = value;
+        
+        emit Updated(_msgSender(), target, key, value);
 
-    function updateAddress(address recipient, bytes32 key, address value) public override onlyOwner(recipient) returns (bool){
-        _infos[recipient].addressStore[key] = value;
-
-        emit Updated(_msgSender(), recipient, key, value);
-
-        tryMint(recipient);
-        
-        return true;
-    }
-    function updateUint256(address recipient, bytes32 key, uint256 value) public override onlyOwner(recipient) returns (bool) {
-        _infos[recipient].uint256Store[key] = value;
-        
-        emit Updated(_msgSender(), recipient, key, value);
-        
-        return true;
-    }
-    function updateInt256(address recipient, bytes32 key, int256 value) public override onlyOwner(recipient) returns (bool) {
-        _infos[recipient].int256Store[key] = value;
-        
-        emit Updated(_msgSender(), recipient, key, value);
-
-        tryMint(recipient);
-        
-        return true;
-    }
-    function updateString(address recipient, bytes32 key, string memory value) override onlyOwner(recipient) public returns (bool) {
-        _infos[recipient].stringStore[key] = value;
-        
-        emit Updated(_msgSender(), recipient, key, value);
-
-        tryMint(recipient);
+        tryMint(target);
 
         return true;
     }
-    function updateBytes(address recipient, bytes32 key, bytes memory value) public override onlyOwner(recipient) returns (bool) {
-        _infos[recipient].bytesStore[key] = value;
-        
-        emit Updated(_msgSender(), recipient, key, value);
-        
-        tryMint(recipient);
-        
-        return true;
+   
+    function getEntry(address target, bytes32 key) public view override returns (string memory value) {
+        return _infos[target][key];
     }
-    function updateBytes32(address recipient, bytes32 key, bytes32 value) public override onlyOwner(recipient) returns (bool) {
-        _infos[recipient].bytes32Store[key] = value;
-        
-        emit Updated(_msgSender(), recipient, key, value);
-        
-        tryMint(recipient);
-        
-        return true;
-    }
-    function updateBool(address recipient, bytes32 key, bool value) public override onlyOwner(recipient) returns (bool) {
-        _infos[recipient].boolStore[key] = value;
-        
-        emit Updated(_msgSender(), recipient, key, value);
-        
-        tryMint(recipient);
-        
-        return true;
-    }
-    
-    
-    function updateAddressByString(address recipient, string memory key, address value) public override returns (bool) {
-        return updateAddress(recipient, keccak256(abi.encodePacked(key)), value);
-    }
-    function updateUint256ByString(address recipient, string memory key, uint256 value) public override returns (bool) {
-        return updateUint256(recipient, keccak256(abi.encodePacked(key)), value);
-    }
-    function updateInt256ByString(address recipient, string memory key, int256 value) public override returns (bool) {
-        return updateInt256(recipient, keccak256(abi.encodePacked(key)), value);
-    }
-    function updateStringByString(address recipient, string memory key, string memory value) public override returns (bool) {
-        return updateString(recipient, keccak256(abi.encodePacked(key)), value);
-    }
-    function updateBytesByString(address recipient, string memory key, bytes memory value) public override returns (bool) {
-        return updateBytes(recipient, keccak256(abi.encodePacked(key)), value);
-    }
-    function updateBytes32ByString(address recipient, string memory key, bytes32 value) public override returns (bool) {
-        return updateBytes32(recipient, keccak256(abi.encodePacked(key)), value);
-    }
-    function updateBoolByString(address recipient, string memory key, bool value) public override returns (bool) {
-        return updateBool(recipient, keccak256(abi.encodePacked(key)), value);
-    }
-    
-    function deleteAddress(address recipient, bytes32 key) public override onlyOwner(recipient) returns (bool) {
-        address value = _infos[recipient].addressStore[key]; 
-        delete _infos[recipient].bytes32Store[key];
-        
-        emit Deleted(_msgSender(), recipient, key, value);
-        
-        return true;
-    }
-    function deleteUint256(address recipient, bytes32 key) public override onlyOwner(recipient) returns (bool) {
-        uint256 value = _infos[recipient].uint256Store[key]; 
-        delete _infos[recipient].bytes32Store[key];
-        
-        emit Deleted(_msgSender(), recipient, key, value);
-        
-        return true;
-    }
-    function deleteInt256(address recipient, bytes32 key) public override onlyOwner(recipient) returns (bool) {
-        int256 value = _infos[recipient].int256Store[key]; 
-        delete _infos[recipient].bytes32Store[key];
-        
-        emit Deleted(_msgSender(), recipient, key, value);
-        
-        return true;
-    }
-    function deleteString(address recipient, bytes32 key) public override onlyOwner(recipient) returns (bool) {
-        string memory value = _infos[recipient].stringStore[key]; 
-        delete _infos[recipient].bytes32Store[key];
-        
-        emit Deleted(_msgSender(), recipient, key, value);
-        
-        return true;
-    }
-    function deleteBytes(address recipient, bytes32 key) public override onlyOwner(recipient) returns (bool) {
-        bytes memory value = _infos[recipient].bytesStore[key]; 
-        delete _infos[recipient].bytes32Store[key];
-        
-        emit Deleted(_msgSender(), recipient, key, value);
-        
-        return true;
-    }
-    function deleteBytes32(address recipient, bytes32 key) public override onlyOwner(recipient) returns (bool) {
-        bytes32 value = _infos[recipient].bytes32Store[key]; 
-        delete _infos[recipient].bytes32Store[key];
-        
-        emit Deleted(_msgSender(), recipient, key, value);
-        
-        return true;
-    }
-    function deleteBool(address recipient, bytes32 key) public override onlyOwner(recipient) returns (bool) {
-        bool value = _infos[recipient].boolStore[key]; 
-        delete _infos[recipient].boolStore[key];
-        
-        emit Deleted(_msgSender(), recipient, key, value);
-        
-        return true;
-    }
-    
-    function getAddress(address recipient, bytes32 key) public view override returns (address value) {
-        return _infos[recipient].addressStore[key];
-    }
-    function getUint256(address recipient, bytes32 key) public view override returns (uint256 value) {
-        return _infos[recipient].uint256Store[key];
-    }
-    function getInt256(address recipient, bytes32 key) public view override returns (int256 value) {
-        return _infos[recipient].int256Store[key];
-    }
-    function getString(address recipient, bytes32 key) public view override returns (string memory value) {
-        return _infos[recipient].stringStore[key];
-    }
-    function getBytes(address recipient, bytes32 key) public view override returns (bytes memory value) {
-        return _infos[recipient].bytesStore[key];
-    }
-    function getBytes32(address recipient, bytes32 key) public view override returns (bytes32 value) {
-        return _infos[recipient].bytes32Store[key];
-    }
-    function getBool(address recipient, bytes32 key) public view override returns (bool value) {
-        return _infos[recipient].boolStore[key];
-    }
-    
-    function getAddressByString(address recipient, string memory key) public view override returns (address value) {
-        return _infos[recipient].addressStore[keccak256(abi.encodePacked(key))];
-    }
-    function getUint256ByString(address recipient, string memory key) public view override returns (uint256 value) {
-        return _infos[recipient].uint256Store[keccak256(abi.encodePacked(key))];
-    }
-    function getInt256ByString(address recipient, string memory key) public view override returns (int256 value) {
-        return _infos[recipient].int256Store[keccak256(abi.encodePacked(key))];
-    }
-    function getStringByString(address recipient, string memory key) public view override returns (string memory value) {
-        return _infos[recipient].stringStore[keccak256(abi.encodePacked(key))];
-    }
-    function getBytesByString(address recipient, string memory key) public view override returns (bytes memory value) {
-        return _infos[recipient].bytesStore[keccak256(abi.encodePacked(key))];
-    }
-    function getBytes32ByString(address recipient, string memory key) public view override returns (bytes32 value) {
-        return _infos[recipient].bytes32Store[keccak256(abi.encodePacked(key))];
-    }
-    function getBoolByString(address recipient, string memory key) public view override returns (bool value) {
-        return _infos[recipient].boolStore[keccak256(abi.encodePacked(key))];
-    }
-    
     
     /**
      * @dev See {ERC721URIStorage}.
