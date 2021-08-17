@@ -10,7 +10,6 @@ import "./openzeppelin-contracts/contracts/utils/Context.sol";
 import "./openzeppelin-contracts/contracts/utils/Counters.sol";
 import "./openzeppelin-contracts/contracts/utils/Address.sol";
 import "./IRegistrar.sol";
-import "./RegistrarPausable.sol";
 
 
 /**
@@ -19,7 +18,7 @@ import "./RegistrarPausable.sol";
  *  - store info by verify owner
  *  - mint token ID
  */
-contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, RegistrarPausable, IRegistrar {
+contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, IRegistrar {
     using Counters for Counters.Counter;
     
     Counters.Counter private _tokenIdTracker;
@@ -28,7 +27,7 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, RegistrarPaus
     bytes public constant OwnerData = abi.encodeWithSelector(OwnerSelector);
 
     // target ==> key ==> value
-    mapping (address => mapping (bytes32 => string)) private _infos;
+    mapping (address => mapping (bytes32 => bytes)) private _infos;
 
     /**
      * @dev Pause all token transfer.
@@ -37,7 +36,6 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, RegistrarPaus
      * See {ERC721-tokenURI}.
      */
     constructor() ERC721("Registrar", "R") {
-        _pause();   // force pause token transfer
     }
 
     function isReceiptOwner(address owner, address target) public view returns (bool) {
@@ -120,7 +118,7 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, RegistrarPaus
         }
     }
    
-    function updateEntry(address target, bytes32 key, string memory value) override onlyOwner(target) public returns (bool) {
+    function updateEntry(address target, bytes32 key, bytes memory value) override onlyOwner(target) public returns (bool) {
         _infos[target][key] = value;
         
         emit Updated(_msgSender(), target, key, value);
@@ -129,8 +127,8 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, RegistrarPaus
 
         return true;
     }
-   
-    function getEntry(address target, bytes32 key) public view override returns (string memory value) {
+    
+    function getEntry(address target, bytes32 key) public view override returns (bytes memory value) {
         return _infos[target][key];
     }
     
@@ -141,7 +139,8 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, RegistrarPaus
         super._burn(tokenId);
     }
     
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override(ERC721, ERC721Enumerable, RegistrarPausable) {
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override(ERC721, ERC721Enumerable) {
+        require(from == address(0), "ERC721Pausable: only mint is allowed");    // force disable transfer
         super._beforeTokenTransfer(from, to, tokenId);
     }
 

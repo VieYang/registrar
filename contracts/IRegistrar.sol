@@ -12,19 +12,19 @@ interface IRegistrar {
      * update the `value` of `key` for `target`.
      * 
      */
-    function updateEntry(address target, bytes32 key, string memory value) external returns (bool);
+    function updateEntry(address target, bytes32 key, bytes memory value) external returns (bool);
 
     /**
      * @dev Returns the `value` of `key` for `recipient`.
      *
      * This value changes when {updateEntry} are called.
      */
-    function getEntry(address target, bytes32 key) external view returns (string memory value);
+    function getEntry(address target, bytes32 key) external view returns (bytes memory value);
     
     /**
      * @dev Emitted when `value` updated.
      *
      * Note that `value` may be zero.
      */
-    event Updated(address indexed owner, address indexed target, bytes32 indexed key, string value);
+    event Updated(address indexed owner, address indexed target, bytes32 indexed key, bytes value);
 }
