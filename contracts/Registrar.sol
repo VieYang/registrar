@@ -27,7 +27,7 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, IRegistrar {
     bytes public constant OwnerData = abi.encodeWithSelector(OwnerSelector);
 
     // target ==> key ==> value
-    mapping (address => mapping (bytes32 => bytes)) private _infos;
+    mapping (address => mapping (bytes32 => string)) private _infos;
 
     /**
      * @dev Pause all token transfer.
@@ -118,7 +118,7 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, IRegistrar {
         }
     }
    
-    function updateEntry(address target, bytes32 key, bytes memory value) override onlyOwner(target) public returns (bool) {
+    function updateEntry(address target, bytes32 key, string memory value) override onlyOwner(target) public returns (bool) {
         _infos[target][key] = value;
         
         emit Updated(_msgSender(), target, key, value);
@@ -128,7 +128,7 @@ contract Registrar is Context, ERC721Enumerable, ERC721URIStorage, IRegistrar {
         return true;
     }
     
-    function getEntry(address target, bytes32 key) public view override returns (bytes memory value) {
+    function getEntry(address target, bytes32 key) public view override returns (string memory value) {
         return _infos[target][key];
     }
     
